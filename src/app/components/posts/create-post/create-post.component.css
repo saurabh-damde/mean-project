@@ -18,3 +18,7 @@ button {
   width: fit-content;
   margin: 1% auto;
 }
+
+mat-spinner {
+  margin: auto;
+}

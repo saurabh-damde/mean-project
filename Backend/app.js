@@ -1,7 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const Post = require("./models/post");
+
+const posts = require("./routes/posts");
 const cred = require("./db.json"); // Needs to be created with the credential data.
 
 const app = express();
@@ -24,39 +25,11 @@ app.use((req, res, nxt) => {
   );
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST, PATCH, DELETE, OPTIONS"
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
   );
   nxt();
 });
 
-app.get("/api/posts", (req, res, nxt) => {
-  Post.find()
-    .then((posts) => {
-      res.status(200).json(posts);
-    })
-    .catch((err) => console.log(err));
-});
-
-app.post("/api/posts", (req, res, nxt) => {
-  const post = new Post({
-    title: req.body.title,
-    content: req.body.content,
-  });
-  post.save().then((result) => {
-    res.status(201).json({
-      message: "New Post Added Successfully!",
-      post: result,
-    });
-  });
-});
-
-app.delete("/api/posts/:id", (req, res, nxt) => {
-  Post.deleteOne({ _id: req.params.id }).then((result) => {
-    res.status(200).json({
-      message: "Post Deleted Successfully!",
-      result: result,
-    });
-  });
-});
+app.use("/api/posts", posts);
 
 module.exports = app;
