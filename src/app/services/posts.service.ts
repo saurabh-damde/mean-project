@@ -10,23 +10,32 @@ import { Post } from '../models/post.model';
 export class PostsService {
   private apiUrl = 'http://localhost:3000/api';
   private posts: Post[] = [];
-  private postsUpdate = new Subject<Post[]>();
+  private postsUpdate = new Subject<{ posts: Post[]; total: number }>();
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  getPosts() {
+  getPosts(pageSize: number, page: number) {
+    const queryParams = `?pageSize=${pageSize}&page=${page}`;
     this.http
-      .get<any[]>(`${this.apiUrl}/posts`)
-      .pipe(
-        map((posts) =>
-          posts.map((post) => {
-            return { ...post, id: post._id };
-          })
-        )
+      .get<{ total: number; posts: any[] }>(
+        `${this.apiUrl}/posts${queryParams}`
       )
-      .subscribe((posts) => {
-        this.posts = posts;
-        this.postsUpdate.next(this.posts.slice());
+      .pipe(
+        map((postsData) => {
+          return {
+            total: postsData.total,
+            posts: postsData.posts.map((post) => {
+              return { ...post, id: post._id };
+            }),
+          };
+        })
+      )
+      .subscribe((postsData) => {
+        this.posts = postsData.posts;
+        this.postsUpdate.next({
+          posts: this.posts.slice(),
+          total: postsData.total,
+        });
       });
   }
 
@@ -51,15 +60,7 @@ export class PostsService {
     postData.append('image', image, title);
     this.http
       .post<{ message: string; post: any }>(`${this.apiUrl}/posts`, postData)
-      .subscribe((res) => {
-        const post: Post = {
-          id: res.post._id,
-          title: title,
-          content: content,
-          imagePath: res.post.imagePath,
-        };
-        this.posts.push(post);
-        this.postsUpdate.next(this.posts.slice());
+      .subscribe(() => {
         this.router.navigate(['/']);
       });
   }
@@ -76,26 +77,12 @@ export class PostsService {
     } else {
       postData = { ...post, imagePath: image };
     }
-    this.http.put(`${this.apiUrl}/posts/${id}`, postData).subscribe((res) => {
-      const postInx = this.posts.findIndex((item) => item.id == id);
-      const newPost = {
-        ...post,
-        //  imagePath: res.imagePath
-      };
-      if (postInx) {
-        this.posts[postInx] = post;
-      } else {
-        this.posts.push(post);
-      }
-      this.postsUpdate.next(this.posts);
+    this.http.put(`${this.apiUrl}/posts/${id}`, postData).subscribe(() => {
       this.router.navigate(['/']);
     });
   }
 
   deletePost(id: string) {
-    this.http.delete(`${this.apiUrl}/posts/${id}`).subscribe(() => {
-      this.posts = this.posts.filter((post) => post.id !== id);
-      this.postsUpdate.next(this.posts.slice());
-    });
+    return this.http.delete(`${this.apiUrl}/posts/${id}`);
   }
 }
