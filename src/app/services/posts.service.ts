@@ -43,6 +43,7 @@ export class PostsService {
       title: string;
       content: string;
       imagePath: string;
+      creator: string;
     }>(`${this.apiUrl}/${id}`);
   }
 

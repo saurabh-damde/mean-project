@@ -6,7 +6,7 @@
       <img [src]="post.imagePath" [alt]="post.title" />
     </div>
     <p>{{ post.content }}</p>
-    <mat-action-row *ngIf="authenticated">
+    <mat-action-row *ngIf="authenticated && userId === post.creator">
       <a
         mat-button
         [routerLink]="['/edit', post.id]"

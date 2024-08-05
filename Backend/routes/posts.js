@@ -67,6 +67,7 @@ router.post(
       title: req.body.title,
       content: req.body.content,
       imagePath: url + "/images/" + req.file.filename,
+      creator: req.userData.id,
     });
     post.save().then((result) => {
       res.status(201).json({
@@ -85,30 +86,47 @@ router.put(
     let imagePath = req.body.imagePath;
     if (req.file) {
       const url = req.protocol + "://" + req.get("host");
-      imagePath: url + "/images/" + req.file.filename;
+      imagePath = url + "/images/" + req.file.filename;
     }
     const post = new Post({
       _id: req.body.id,
       title: req.body.title,
       content: req.body.content,
       imagePath: imagePath,
+      creator: req.userData.id,
     });
-    Post.updateOne({ _id: req.params.id }, post).then((result) => {
-      res.status(200).json({
-        message: "Post Updated Successfully!",
-        post: result,
-      });
-    });
+    Post.updateOne({ _id: req.params.id, creator: req.userData.id }, post).then(
+      (result) => {
+        if (result.modifiedCount > 0) {
+          res.status(200).json({
+            message: "Post Updated Successfully!",
+            post: result,
+          });
+        } else {
+          res.status(401).json({
+            message: "User Unauthorized!",
+          });
+        }
+      }
+    );
   }
 );
 
 router.delete("/:id", checkAuth, (req, res, nxt) => {
-  Post.deleteOne({ _id: req.params.id }).then((result) => {
-    res.status(200).json({
-      message: "Post Deleted Successfully!",
-      result: result,
-    });
-  });
+  Post.deleteOne({ _id: req.params.id, creator: req.userData.id }).then(
+    (result) => {
+      if (result.deletedCount > 0) {
+        res.status(200).json({
+          message: "Post Deleted Successfully!",
+          result: result,
+        });
+      } else {
+        res.status(401).json({
+          message: "User Unauthorized!",
+        });
+      }
+    }
+  );
 });
 
 module.exports = router;

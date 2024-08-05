@@ -12,6 +12,7 @@ export class AuthService {
   private authStatus = new Subject<boolean>();
   private token: string;
   private expiry: NodeJS.Timeout;
+  private userId: string;
   private authenticated: boolean = false;
 
   constructor(private http: HttpClient, private router: Router) {}
@@ -22,6 +23,10 @@ export class AuthService {
 
   isAuthenticated() {
     return this.authenticated;
+  }
+
+  getUserId() {
+    return this.userId;
   }
 
   getAuthStatus() {
@@ -36,15 +41,19 @@ export class AuthService {
 
   login(authData: Auth) {
     this.http
-      .post<{ token: string; expiresIn: number }>(`${this.apiUrl}`, authData)
+      .post<{ token: string; expiresIn: number; userId: string }>(
+        `${this.apiUrl}`,
+        authData
+      )
       .subscribe((res) => {
         this.token = res.token;
         if (this.token) {
           this.setAuthTimer(res.expiresIn);
           this.authenticated = true;
+          this.userId = res.userId;
           this.authStatus.next(this.authenticated);
           const expiry = new Date(new Date().getTime() + res.expiresIn * 1000);
-          this.saveAuthData(res.token, expiry);
+          this.saveAuthData(res.token, expiry, res.userId);
           this.router.navigate(['/']);
         }
       });
@@ -55,6 +64,7 @@ export class AuthService {
     this.authenticated = false;
     this.authStatus.next(this.authenticated);
     clearTimeout(this.expiry);
+    this.userId = null;
     this.clearAuthData();
     this.router.navigate(['/']);
   }
@@ -67,6 +77,7 @@ export class AuthService {
     const expiry = new Date(authData.expiry).getTime() - new Date().getTime();
     if (expiry > 0) {
       this.token = authData.token;
+      this.userId = authData.userId;
       this.authenticated = true;
       this.setAuthTimer(expiry / 1000);
       this.authStatus.next(this.authenticated);
@@ -77,10 +88,14 @@ export class AuthService {
     this.expiry = setTimeout(() => this.logout(), duration * 1000);
   }
 
-  private saveAuthData(token: string, expiry: Date) {
+  private saveAuthData(token: string, expiry: Date, userId: string) {
     localStorage.setItem(
       'authData',
-      JSON.stringify({ token: token, expiry: expiry.toISOString() })
+      JSON.stringify({
+        token: token,
+        expiry: expiry.toISOString(),
+        userId: userId,
+      })
     );
   }
 
