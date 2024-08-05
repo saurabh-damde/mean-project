@@ -8,7 +8,7 @@ import { Post } from '../models/post.model';
   providedIn: 'root',
 })
 export class PostsService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:3000/api/posts';
   private posts: Post[] = [];
   private postsUpdate = new Subject<{ posts: Post[]; total: number }>();
 
@@ -17,9 +17,7 @@ export class PostsService {
   getPosts(pageSize: number, page: number) {
     const queryParams = `?pageSize=${pageSize}&page=${page}`;
     this.http
-      .get<{ total: number; posts: any[] }>(
-        `${this.apiUrl}/posts${queryParams}`
-      )
+      .get<{ total: number; posts: any[] }>(`${this.apiUrl}${queryParams}`)
       .pipe(
         map((postsData) => {
           return {
@@ -45,7 +43,7 @@ export class PostsService {
       title: string;
       content: string;
       imagePath: string;
-    }>(`${this.apiUrl}/posts/${id}`);
+    }>(`${this.apiUrl}/${id}`);
   }
 
   getPostsSubscription() {
@@ -59,7 +57,7 @@ export class PostsService {
     postData.append('content', content);
     postData.append('image', image, title);
     this.http
-      .post<{ message: string; post: any }>(`${this.apiUrl}/posts`, postData)
+      .post<{ message: string; post: any }>(`${this.apiUrl}`, postData)
       .subscribe(() => {
         this.router.navigate(['/']);
       });
@@ -77,12 +75,12 @@ export class PostsService {
     } else {
       postData = { ...post, imagePath: image };
     }
-    this.http.put(`${this.apiUrl}/posts/${id}`, postData).subscribe(() => {
+    this.http.put(`${this.apiUrl}/${id}`, postData).subscribe(() => {
       this.router.navigate(['/']);
     });
   }
 
   deletePost(id: string) {
-    return this.http.delete(`${this.apiUrl}/posts/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

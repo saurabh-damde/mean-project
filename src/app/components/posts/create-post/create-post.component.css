@@ -9,6 +9,11 @@ mat-form-field {
   margin: auto;
   margin-top: 1%;
 }
+
+mat-spinner {
+  margin: auto;
+}
+
 textarea {
   width: 100%;
   margin: auto;
@@ -17,10 +22,6 @@ textarea {
 button {
   width: fit-content;
   margin: 1% auto;
-}
-
-mat-spinner {
-  margin: auto;
 }
 
 input[type="file"] {
