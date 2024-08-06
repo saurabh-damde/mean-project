@@ -40,8 +40,7 @@ router.post("/login", (req, res, nxt) => {
     })
     .catch((err) =>
       res.status(401).json({
-        message: "Authentication Failed!",
-        error: err,
+        message: "Invalid Authentication Credentials!",
       })
     );
 });
@@ -63,7 +62,7 @@ router.post("/signup", (req, res, nxt) => {
       )
       .catch((err) =>
         res.status(500).json({
-          error: err,
+          message: "The Email is already in use, try logging in.",
         })
       );
   });

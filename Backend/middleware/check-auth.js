@@ -8,7 +8,7 @@ module.exports = (req, res, nxt) => {
     nxt();
   } catch (err) {
     res.status(401).json({
-      message: "Authorization Failed!",
+      message: "You are not authorized!",
     });
   }
 };

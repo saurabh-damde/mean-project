@@ -34,9 +34,13 @@ export class AuthService {
   }
 
   signup(authData: Auth) {
-    this.http
-      .post(`${this.apiUrl}`, authData)
-      .subscribe((res) => console.log(res));
+    this.http.post(`${this.apiUrl}`, authData).subscribe({
+      next: () => this.router.navigate(['/']),
+      error: (err) => {
+        console.log(err);
+        this.authStatus.next(false);
+      },
+    });
   }
 
   login(authData: Auth) {
@@ -45,17 +49,25 @@ export class AuthService {
         `${this.apiUrl}`,
         authData
       )
-      .subscribe((res) => {
-        this.token = res.token;
-        if (this.token) {
-          this.setAuthTimer(res.expiresIn);
-          this.authenticated = true;
-          this.userId = res.userId;
-          this.authStatus.next(this.authenticated);
-          const expiry = new Date(new Date().getTime() + res.expiresIn * 1000);
-          this.saveAuthData(res.token, expiry, res.userId);
-          this.router.navigate(['/']);
-        }
+      .subscribe({
+        next: (res) => {
+          this.token = res.token;
+          if (this.token) {
+            this.setAuthTimer(res.expiresIn);
+            this.authenticated = true;
+            this.userId = res.userId;
+            this.authStatus.next(this.authenticated);
+            const expiry = new Date(
+              new Date().getTime() + res.expiresIn * 1000
+            );
+            this.saveAuthData(res.token, expiry, res.userId);
+            this.router.navigate(['/']);
+          }
+        },
+        error: (err) => {
+          console.log(err);
+          this.authStatus.next(false);
+        },
       });
   }
 

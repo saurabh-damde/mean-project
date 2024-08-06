@@ -44,17 +44,27 @@ router.get("", (req, res, nxt) => {
     .then((count) => {
       res.status(200).json({ total: count, posts: posts });
     })
-    .catch((err) => console.log(err));
+    .catch((err) =>
+      res.status(500).json({
+        message: "Fetching Posts Failed!",
+      })
+    );
 });
 
 router.get("/:id", (req, res, nxt) => {
-  Post.findById(req.params.id).then((post) => {
-    if (post) {
-      res.status(200).json(post);
-    } else {
-      res.status(404).json({ message: "Post Not Found!" });
-    }
-  });
+  Post.findById(req.params.id)
+    .then((post) => {
+      if (post) {
+        res.status(200).json(post);
+      } else {
+        res.status(404).json({ message: "Post Not Found!" });
+      }
+    })
+    .catch((err) =>
+      res.status(500).json({
+        message: "Fetching Post Failed!",
+      })
+    );
 });
 
 router.post(
@@ -69,12 +79,19 @@ router.post(
       imagePath: url + "/images/" + req.file.filename,
       creator: req.userData.id,
     });
-    post.save().then((result) => {
-      res.status(201).json({
-        message: "New Post Added Successfully!",
-        post: result,
-      });
-    });
+    post
+      .save()
+      .then((result) => {
+        res.status(201).json({
+          message: "New Post Added Successfully!",
+          post: result,
+        });
+      })
+      .catch((err) =>
+        res.status(500).json({
+          message: "Creating Post Failed!",
+        })
+      );
   }
 );
 
@@ -95,8 +112,8 @@ router.put(
       imagePath: imagePath,
       creator: req.userData.id,
     });
-    Post.updateOne({ _id: req.params.id, creator: req.userData.id }, post).then(
-      (result) => {
+    Post.updateOne({ _id: req.params.id, creator: req.userData.id }, post)
+      .then((result) => {
         if (result.modifiedCount > 0) {
           res.status(200).json({
             message: "Post Updated Successfully!",
@@ -107,14 +124,18 @@ router.put(
             message: "User Unauthorized!",
           });
         }
-      }
-    );
+      })
+      .catch((err) =>
+        res.status(500).json({
+          message: "Couldn't update the Post!",
+        })
+      );
   }
 );
 
 router.delete("/:id", checkAuth, (req, res, nxt) => {
-  Post.deleteOne({ _id: req.params.id, creator: req.userData.id }).then(
-    (result) => {
+  Post.deleteOne({ _id: req.params.id, creator: req.userData.id })
+    .then((result) => {
       if (result.deletedCount > 0) {
         res.status(200).json({
           message: "Post Deleted Successfully!",
@@ -125,8 +146,12 @@ router.delete("/:id", checkAuth, (req, res, nxt) => {
           message: "User Unauthorized!",
         });
       }
-    }
-  );
+    })
+    .catch((err) =>
+      res.status(500).json({
+        message: "Deleting Post Failed!",
+      })
+    );
 });
 
 module.exports = router;
