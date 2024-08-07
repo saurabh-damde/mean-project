@@ -41,9 +41,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# Creds
-/Backend/db.json
-
 # Files
 /Backend/images/*.jpg
 /Backend/images/*.png

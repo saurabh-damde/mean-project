@@ -5,13 +5,12 @@ const mongoose = require("mongoose");
 
 const user = require("./routes/user");
 const posts = require("./routes/posts");
-const cred = require("./db.json"); // Needs to be created with the credential data.
 
 const app = express();
 
 mongoose
   .connect(
-    `mongodb+srv://${cred.username}:${cred.password}@mazino.wm8ui5a.mongodb.net/mean?w=majority&appName=${cred.app}`
+    `mongodb+srv://${process.env.username}:${process.env.password}@${process.env.cluster}.wm8ui5a.mongodb.net/mean?w=majority&appName=${process.env.app}`
   )
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.log(err));

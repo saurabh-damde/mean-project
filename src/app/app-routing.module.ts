@@ -5,11 +5,11 @@ import { SignupComponent } from './components/auth/signup/signup.component';
 import { CreatePostComponent } from './components/posts/create-post/create-post.component';
 import { PostListComponent } from './components/posts/post-list/post-list.component';
 import { AuthGuard } from './utils/auth.guard';
+import { AuthRoutingModule } from './components/auth/auth-routing.module';
 
 const routes: Routes = [
   { path: '', component: PostListComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignupComponent },
+  { path: 'auth', loadChildren: () => AuthRoutingModule },
   { path: 'create', component: CreatePostComponent, canActivate: [AuthGuard] },
   {
     path: 'edit/:id',

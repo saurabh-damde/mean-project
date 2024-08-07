@@ -1,0 +1,9 @@
+{
+  "env": {
+    "app": "mazino",
+    "cluster": "mazino",
+    "username": "saurabh",
+    "password": "Saurabh",
+    "jwt": "this_is_a_secret"
+  }
+}

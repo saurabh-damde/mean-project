@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { Auth } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/user';
+  private apiUrl = `${environment.apiUrl}/user`;
   private authStatus = new Subject<boolean>();
   private token: string;
   private expiry: NodeJS.Timeout;
@@ -34,7 +35,7 @@ export class AuthService {
   }
 
   signup(authData: Auth) {
-    this.http.post(`${this.apiUrl}`, authData).subscribe({
+    this.http.post(`${this.apiUrl}/login`, authData).subscribe({
       next: () => this.router.navigate(['/']),
       error: (err) => {
         console.log(err);
@@ -46,7 +47,7 @@ export class AuthService {
   login(authData: Auth) {
     this.http
       .post<{ token: string; expiresIn: number; userId: string }>(
-        `${this.apiUrl}`,
+        `${this.apiUrl}/signup`,
         authData
       )
       .subscribe({
